@@ -1,0 +1,56 @@
+---
+title: "ApiBCB"
+author: "Gabriel Oliveira"
+date: "21/02/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instalando as bibliotecas necessárias
+```{r}
+install.packages("httr") 
+install.packages("jsonlite")
+```
+
+# Carregando as bibliotecas necessárias
+```{r}
+library(httr)
+library(jsonlite)
+```
+
+#Função para coletar dados direto do BCB
+```{r}
+consulta_SGSbc <- function(serialcode, initialdate, finaldate){
+  #Parametros para a url de consulta
+  base_url <- "http://api.bcb.gov.br/dados/serie/bcdata.sgs."
+  dataformat <- "/dados?formato=json&dataInicial="
+  finishdataformat <- "&dataFinal="
+
+  #Formatando a URL para requerimento
+  SGSurl <- paste(base_url, serialcode, dataformat, initialdate, finishdataformat, finaldate, sep = "")
+  
+  #Requerindo os dados na fonte
+  rawdata <- GET(SGSurl)
+  
+  #Conversão do formato json para um DataFrame
+        content_json <- fromJSON(rawToChar(rawdata$content), flatten=TRUE)
+            return(content_json)
+}
+```
+
+# Recebendo os dados
+Na função para consultar séries temporais do Banco Central: <br />
+    -> Primeiro informar o código da série (consultar código em https://www3.bcb.gov.br/sgspub/localizarseries/localizarSeries.do?method=prepararTelaLocalizarSeries) <br />
+    -> Segundo informar a data inicial no formato dd/MM/aaaa <br />
+    -> Terceiro informar a data final no formato dd/MM/aaaa <br />
+
+```{r}
+#Aqui eu estou requerindo os dados da Selic que o código é o 11.
+SELIC <- consulta_SGSbc("11", "11/01/2021", "15/12/2021")
+
+SELIC
+```
+
